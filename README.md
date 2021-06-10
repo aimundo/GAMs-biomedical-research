@@ -26,7 +26,7 @@ Note that although the code in each of the aforementioned files is independent f
 
 The repository also contains the additional files required to knit a full PDF/HTML document: 
 
-- `preamble.sty` contains LaTeX formatting options for authors, line numbers, figures, etc.
+- `preamble.sty` contains LaTeX formatting options for a PDF document (author block, line numbers, figures, etc.)
 - `refs.bib` contains the References used in the paper
 - `style.css` has the CSS options for an HTML document.
 - `elsevier-with-titles.csl` has the formatting used for the References.

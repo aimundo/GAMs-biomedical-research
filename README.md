@@ -24,6 +24,14 @@ The workflow to fit a GAM can be found in `07-Appendix.Rmd`
 
 Note that although the code in each of the aforementioned files is independent from code in other files, certain sections of code _in each file_ may depend on other code chunks _within_ the same file. 
 
+The repository also contains the additional files required to knit a full PDF/HTML document: 
+
+- `preamble.sty` contains LaTeX formatting options for authors, line numbers, figures, etc.
+- `refs.bib` contains the References used in the paper
+- `style.css` has the CSS options for an HTML document.
+- `elsevier-with-titles.csl` has the formatting used for the References.
+- `orcid.png` is the ORCID logo used in the manuscript to associate the ORCID number of the authors and  display it in the paper.
+
 # License
 
 This entire repository is licensed under a CC BY 4.0 License, which allows reuse with attribution. However, certain files are released under the CC0 1.0 public domain dedication. The files indicated below are dual licensed under CC BY 4.0 and CC0 1.0:

@@ -1,0 +1,10 @@
+
+# Conclusion
+
+We have presented GAMs as a method to analyze longitudinal biomedical data. Future directions of this work will include simulation-based estimations of statistical power using GAMs, as well as demonstrating the prediction capabilities of these models using large datasets. 
+By making the data and code used in this paper accessible, we hope to address the need of creating and sharing reproducible work in biomedical research.
+
+# Acknowledgements
+
+This work was supported by the National Science Foundation Career Award (CBET 1751554, TJM) and the Arkansas Biosciences Institute.
+

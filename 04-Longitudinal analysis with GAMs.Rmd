@@ -1,0 +1,492 @@
+
+# The analyisis of longitudinal biomedical data using GAMs{#longitudinal-GAMs}
+
+The previous sections provided the basic framework to understand the GAM framework and how these models are more advantageous to analyze non-linear longitudinal data when compared to rm-ANOVA or LMEMs. This section will use simulation to present the practical implementation of GAMs for longitudinal biomedical data using $\textsf{R}$ and the package `mgcv`. The code for the simulated data and figures, and a brief guide for model selection and diagnostics appear in the Appendix.
+
+## Simulated data
+
+The simulated data is based on the reported longitudinal changes in oxygen saturation ($\mbox{StO}_2$) in subcutaneous tumors that appear in Figure 3C in [@vishwanath2009]. In the paper, diffuse reflectance spectroscopy was used to quantify $\mbox{StO}_2$ changes in both groups at the same time points (days 0, 2, 5, 7 and 10). In the "Treatment" group (chemotherapy) an increase in $\mbox{StO}_2$ is observed through time, while a decrease is seen in the "Control" (saline) group. Following the reported trend, we simulated 10 normally distributed observations at each time point with a standard deviation (SD) of 10% (matching the SD in the original paper). 
+The simulated and real data appear in Figure \@ref(fig:sim-smooth-plot)A and the inset, respectively.
+
+## An interaction GAM for longitudinal data
+
+An interaction effect is typically the main interest in longitudinal biomedical data, as it takes into account treatment, time, and their combination. In a practical sense, when a GAM is implemented for longitudinal data, a smooth can be added to the model for the _time_ effect to account for the repeated measures over time.  Although specific methods of how GAMs model correlation structures is a topic beyond the scope of this paper, it suffices to say that GAMs are flexible and can handle correlation structures beyond compound symmetry. A detailed description on basis functions and correlations can be found in [@hefley2017]. 
+
+For the data in Figure \@ref(fig:sim-smooth-plot), A the main effect of interest is how $\mbox{StO}_2$ changes over time for each treatment. To estimate this, the model incorporates independent smooths for _Group_ and _Day_, respectively. The main thing to consider is that model syntax accounts for the fact that one of the variables is numeric (*Day*) and the other is a factor (*Group*). Because the smooths are centered at 0, the factor variable needs to be specified as a parametric term in order to identify any differences between the groups. Using $\textsf{R}$ and the package `mgcv` the model syntax is:
+
+`m1 <- gam(StO2_sim ~ Group + s(Day, by=Group, k=5), method='REML, data = dat_sim)`
+
+
+This syntax specifies that `m1` will store the model, and that the change in the simulated oxygen saturation (`StO2_sim`) is modeled using independent smooths over `Day` for each `Group` (the parenthesis preceded by `s`) using 5 knots. The smooth is constructed by default using thin plate regression splines, but other splines can be used if desired, including Gaussian process smooths [@simpson2018]. The parametric term `Group` is added to quantify overall mean differences in the effect of treatment between groups, and the `method` chosen to estimate the smoothing parameters is the restricted maximum likelihood (REML) [@wood2017]. When the smooths are plotted over the raw data, it is clear that the model has been able to capture the trend of the change of $\mbox{StO}_2$ for each group across time (Figure \@ref(fig:sim-smooth-plot)B). Model diagnostics can be obtained using the `gam.check` function, and the function `appraise` from the package _gratia_ [@gratia]. A guide for model selection and diagnostics is in the [Appendix](#workflow), and an in-depth analysis can be found in [@wood2017] and [@harezlak2018]. 
+
+One question that might arise at this point is "what is the fit that an rm-ANOVA model produces for the simulated data?". The rm-ANOVA model, which corresponds to Equation \@ref(eq:linear-model) is presented in Figure \@ref(fig:sim-smooth-plot)C. This is a typical case of model misspecification: The slopes of each group are different, which would lead to a _p-value_ indicating significance for the treatment and time effects, but the model is not capturing the changes that occur at days 2 and between days 5 and 7, whereas the GAM model is able to reliably estimate the trend over all timepoints (Figure \@ref(fig:sim-smooth-plot)B) .
+
+```{r,sim-tumor-response,echo=FALSE,include=FALSE,message=FALSE,warning=FALSE}
+dat<-tibble(StO2=c(4,27,3,2,0.5,7,4,50,45,56),
+            Day=rep(c(0,2,5,7,10),times=2),
+            Group=as.factor(rep(c("Control","Treatment"),each=5))
+            )
+
+
+## plot the mean response
+f1<-ggplot(dat, 
+           aes(x = Day, 
+               y = StO2, 
+               color = Group)) +
+    geom_line(size=1,
+              show.legend = FALSE)+
+    geom_point(show.legend = FALSE,
+               size=1.5,
+               alpha=0.5)+
+  labs(y=expression(paste(StO[2],
+                          ' (real)')))+
+  theme_classic()+
+  thm+
+    scale_x_continuous(breaks=c(0,5,10))+
+    scale_y_continuous(breaks=c(0,40))+
+  plot_layout(tag_level = 'new')+
+  theme(
+    plot.background = element_rect(fill = "transparent", 
+                                   color = NA),
+    axis.text=element_text(size=14)
+  )
+
+
+#This function simulates data for the tumor data using default parameters of 10 observations per time point,and Standard deviation (sd) of 5%.
+#Because physiologically StO2 cannot go below 0%, data is  generated with a cutoff value of 0.0001 (the "StO2_sim")
+
+simulate_data <- function(dat, n = 10, sd = 5) {
+    dat_sim <- dat %>%
+        slice(rep(1:n(), each = n)) %>%
+        group_by(Group, Day) %>%
+        mutate(
+               StO2_sim = pmax(rnorm(n, StO2, sd), 0.0001),
+               subject=rep(1:10),
+               subject=factor(paste(subject, Group, sep = "-"))
+               ) %>%
+        ungroup()
+
+    return(dat_sim)
+}
+
+
+#subject = factor(paste(subject, treatment, sep = "-")))
+
+n <- 10 #number of observations
+sd <- 10 #approximate sd from paper
+df <- 6
+dat_sim <- simulate_data(dat, n, sd)
+
+#plotting simulated data
+f2<-ggplot(dat_sim, aes(x = Day, y = StO2_sim, color = Group)) +
+    geom_point(show.legend=FALSE,size=1.5,alpha=0.5)+
+    stat_summary(aes(y = StO2_sim,
+                     group=Group), 
+                 fun=mean, geom="line",size=1,show.legend = FALSE)+
+  labs(y=expression(atop(StO[2],'(simulated)')))+
+  theme_classic()+
+  theme(
+    axis.text=element_text(size=22)
+  )+
+  thm+
+    scale_x_continuous(breaks=c(0,2,5,7,10))
+  
+
+```
+
+
+
+```{r,smooth-plot,echo=FALSE,include=FALSE,message=FALSE,warning=FALSE}
+
+#GAM for StO2
+
+m1 <- gam(StO2_sim ~ Group+s(Day, by = Group, k = 5),
+            method='REML',
+            data  = dat_sim)
+
+
+
+#linear model
+lm1<-lm(StO2_sim ~ Day + Group + Day * Group, data = dat_sim)
+
+
+#creates a dataframe using the length of the covariates for the GAM
+gam_predict <- expand_grid(Group = factor(c("Control", "Treatment")),
+                         Day = seq(0, 10, by = 0.1),
+                         subject=factor(rep(1:10)))
+
+#creates a dataframe using the length of the covariates for rm-ANOVA
+lm_predict<-expand_grid(Group = factor(c("Control", "Treatment")),
+                         Day = c(0:10),
+                        subject=factor(rep(1:10)),
+                          )
+lm_predict$subject<-factor(paste(lm_predict$subject, lm_predict$Group, sep = "-"))
+
+#adds the predictions to the grid and creates a confidence interval for GAM
+gam_predict<-gam_predict%>%
+    mutate(fit = predict(m1,gam_predict,se.fit = TRUE,type='response')$fit,
+           se.fit = predict(m1, gam_predict,se.fit = TRUE,type='response')$se.fit)
+
+#using lm
+lm_predict<-lm_predict%>%
+    mutate(fit = predict(lm1,lm_predict,se.fit = TRUE,type='response')$fit,
+           se.fit = predict(lm1, lm_predict,se.fit = TRUE,type='response')$se.fit)
+
+#plot smooths and confidence interval for GAM
+f3<-ggplot(data=dat_sim, aes(x=Day, y=StO2_sim, group=Group)) +
+    geom_point(aes(color=Group),size=1.5,alpha=0.5,show.legend = FALSE)+
+  geom_ribbon(aes( x=Day,ymin=(fit - 2*se.fit), 
+                   ymax=(fit + 2*se.fit),
+                   fill=Group
+                   ),
+              alpha=0.3,
+              data=gam_predict,
+            show.legend=FALSE,
+                inherit.aes=FALSE) +
+  geom_line(aes(y=fit,
+                color=Group),
+              size=1,data=gam_predict,
+              show.legend = FALSE)+
+  #facet_wrap(~Group)+
+  labs(y=expression(atop(StO[2],'complete')))+
+    scale_x_continuous(breaks=c(0,2,5,7,10))+
+      theme_classic()+
+  theme(
+    axis.text=element_text(size=22)
+  )+
+      thm+
+  thm1
+ 
+#plot linear fit for rm-ANOVA
+f4<-ggplot(data=dat_sim, aes(x=Day, y=StO2_sim, group=Group)) +
+    geom_point(aes(color=Group),size=1.5,alpha=0.5,show.legend = FALSE)+
+  geom_ribbon(aes( x=Day,ymin=(fit - 2*se.fit), 
+                   ymax=(fit + 2*se.fit),fill=Group),
+              alpha=0.3,
+              data=lm_predict,
+              show.legend = FALSE,
+                inherit.aes=FALSE) +
+  geom_line(aes(y=fit,
+                color=Group),
+              size=1,data=lm_predict,
+              show.legend = FALSE)+
+  #facet_wrap(~Group)+
+  labs(y=expression(paste('StO'[2],' (simulated)')))+
+    scale_x_continuous(breaks=c(0,2,5,7,10))+
+      theme_classic()+
+  theme(
+    axis.text=element_text(size=22)
+  )+
+  thm+
+  thm1
+ 
+
+
+#posthoc comparisons for the linear model
+#library(multcomp)
+
+
+#summary(glht(lm1, linfct = mcp(Group = 'Tukey')))
+#summary(glht(lm1, linfct=mcp(Group="Tukey", interaction_average=TRUE)))
+
+```
+
+
+Because GAMs do not require equally-spaced or complete observations for all subjects, they are advantageous to analyze longitudinal data where missingness exists. The rationale behind this is that GAMs are able to pick the trend in the data even when some observations are missing. However, this usually causes the resulting smooths to have wider confidence intervals and less ability to pick certain trends. Consider the  simulated $\mbox{StO}_2$ values from Figure \@ref(fig:sim-smooth-plot)B. If 40% of the total observations are randomly deleted and the same interaction GAM fitted for the complete dataset is used, the resulting smooths are still able to show a different trend for each group, but because the empirical Bayesian credible intervals for the smooths overlap during the first 3 days with fewer data points, the trend is less pronounced than in the full dataset (Figure \@ref(fig:sim-smooth-plot)D). Although the confidence intervals have increased for both smooths, the model still shows different trends with as little as 4 observations per group at certain time points.
+
+```{r,missing-data,echo=FALSE,include=FALSE,message=FALSE,warning=FALSE}
+#missing data
+#create a sequence of 40 random numbers between 1 and 100, these numbers will
+#correspond to the row numbers to be randomly erased from the original dataset
+missing <- sample(1:100, 40)
+
+#create a new dataframe from the simulated data with 40 rows randomly removed, keep the missing values as NA
+
+ind <- which(dat_sim$StO2_sim %in% sample(dat_sim$StO2_sim, 40))
+
+#create a new dataframe, remove the StO2 column
+dat_missing <- dat_sim[,-1]
+
+#add NAs at the ind positions
+dat_missing$StO2_sim[ind]<-NA 
+
+#Count the number of remaining observations per day (original dataset had 10 per group per day)
+dat_missing %>%
+    group_by(Day,Group) %>%
+    filter(!is.na(StO2_sim))%>%
+  count(Day)
+
+
+#the same model used for the full dataset
+mod_m1 <- gam(StO2_sim ~ Group+s(Day,by=Group,k=5), data  = dat_missing,family=scat)
+#appraise the model
+appraise(mod_m1)
+
+
+m_predict <- expand_grid(Group = factor(c("Control", "Treatment")),
+                         Day = seq(0, 10, by = 0.1))
+
+#adds the predictions to the grid and creates a confidence interval
+m_predict<-m_predict%>%
+    mutate(fit = predict(mod_m1,m_predict,se.fit = TRUE,type='response')$fit,
+           se.fit = predict(mod_m1, m_predict,se.fit = TRUE,type='response')$se.fit)
+
+
+f6<-ggplot(data=dat_missing, aes(x=Day, y=StO2_sim, group=Group)) +
+    geom_point(aes(color=Group),size=1.5,alpha=0.5,show.legend = FALSE)+
+  geom_ribbon(aes( x=Day,ymin=(fit - 2*se.fit), 
+                   ymax=(fit + 2*se.fit),
+                   fill=Group
+                   ),
+              alpha=0.3,
+              data=m_predict,
+            show.legend=FALSE,
+                inherit.aes=FALSE) +
+  geom_line(aes(y=fit,
+                color=Group),
+              size=1,data=m_predict,
+              show.legend = TRUE)+
+  #facet_wrap(~Group)+
+  labs(y=expression(atop(StO[2],'missing')))+
+    scale_x_continuous(breaks=c(0,2,5,7,10))+
+      theme_classic()+
+  theme(
+    axis.text=element_text(size=22)
+  )+
+  thm+
+  thm1
+
+
+
+```
+
+(ref:sim-plot-caption) Simulated data and smooths for oxygen saturation in tumors. A: Simulated data that follows previously reported trends (inset) in tumors under chemotherapy (Treatment) or saline (Control) treatment. Simulated data is from  a normal distribution with standard deviation of 10% with 10 observations per time point. Lines indicate mean oxygen saturation B: Smooths from the GAM model for the full simulated data with interaction of Group and Treatment. Lines represent trends for each group, shaded regions are 95% confidence intervals. C: The rm-ANOVA model for the simulated data, which does not capture the changes in each group over time. D: Smooths for the GAM model for the simulated data with 40% of its observations missing. Lines represent trends for each group, shaded regions are 95% empirical Bayesian confidence intervals.
+
+```{r,sim-smooth-plot,fig.width=10, fig.height=7, out.width='75%', fig.align='center',echo=FALSE,message=FALSE, warning=FALSE,fig.cap='(ref:sim-plot-caption)'}
+
+
+mult_plot<-f2+inset_element(
+  f1, left = 0.01, 
+  bottom = 0.5, 
+  right = 0.5, 
+  top = 1.0)+
+  f3+f4+f6+
+   plot_annotation(tag_levels='A')&
+   ylim(c(-7,75)) &
+  theme(
+     text=element_text(size=18)
+     )&
+  thm
+
+mult_plot
+
+```
+
+
+
+```{r,pairwise-comp,echo=FALSE,include=FALSE,message=FALSE,warning=FALSE}
+##Pairwise comparisons
+
+pdat <- expand.grid(Day = seq(0, 10, length = 400),
+                    Group = c('Control', 'Treatment'))
+
+#this function takes the model, grid and groups to be compared using the lpmatrix
+
+smooth_diff <- function(model, newdata, g1, g2, alpha = 0.05,
+                        unconditional = FALSE) {
+    xp <- predict(model, newdata = newdata, type = 'lpmatrix')
+    #Find columns in xp where the name contains "Control" and "Treatment"
+    col1 <- grepl(g1, colnames(xp))
+    col2 <- grepl(g2, colnames(xp))
+    #Find rows in xp that correspond to each treatment
+    row1 <- with(newdata, Group == g1)
+    row2 <- with(newdata, Group == g2)
+    ## difference rows of xp for data from comparison
+    X <- xp[row1, ] - xp[row2, ]
+    ## zero out cols of X related to splines for other lochs
+    X[, ! (col1 | col2)] <- 0
+    ## zero out the parametric cols
+    #X[, !grepl('^s\\(', colnames(xp))] <- 0
+    dif <- X %*% coef(model)
+    se <- sqrt(rowSums((X %*% vcov(model, unconditional = unconditional)) * X))
+    crit <- qt(alpha/2, df.residual(model), lower.tail = FALSE)
+    upr <- dif + (crit * se)
+    lwr <- dif - (crit * se)
+    data.frame(pair = paste(g1, g2, sep = '-'),
+               diff = dif,
+               se = se,
+               upper = upr,
+               lower = lwr)
+}
+
+comp1<-smooth_diff(m1,pdat,'Control','Treatment')
+
+comp_StO2_full <- cbind(Day = seq(0, 10, length = 400),
+                   rbind(comp1)) %>%
+  mutate(interval=case_when(
+    upper>0 & lower<0~"no-diff",
+    upper<0~"less",
+    lower>0~"greater"
+  ))
+
+#function to obtain values for the shading regions
+pairwise_limits<-function(dataframe){
+    #extract values where the lower limit of the ribbon is greater than zero
+    #this is the region where the control group effect is greater
+    v1<-dataframe%>%
+        filter(lower>0)%>%
+        select(Day)
+    #get day  initial value
+    init1=v1$Day[[1]]
+    #get day final value
+    final1=v1$Day[[nrow(v1)]]
+
+    #extract values where the value of the upper limit of the ribbon is lower than zero
+    #this corresponds to the region where the treatment group effect is greater
+    v2<-comp_StO2_full%>%
+        filter(upper<0)%>%
+        select(Day)
+
+    init2=v2$Day[[1]]
+    final2=v2$Day[[nrow(v2)]]
+    #store values
+    my_list<-list(init1=init1,
+                  final1=final1,
+                  init2=init2,
+                  final2=final2)
+return(my_list)
+}
+
+my_list<-pairwise_limits(comp_StO2_full)
+rib_col<-'#EDD03AFF' #color for ribbon
+
+c1<-ggplot(comp_StO2_full, aes(x = Day, y = diff, group = pair)) +
+    annotate("rect",
+                xmin =my_list$init1, xmax =my_list$final1,ymin=-Inf,ymax=Inf,
+                fill='#30123BFF',
+                alpha = 0.5,
+                ) +
+  annotate("text",
+             x=1.5,
+             y=-18,
+             label="Control>Treatment",
+           size=8,
+           angle=90
+           )+
+    annotate("rect",
+             xmin =my_list$init2, xmax =my_list$final2,ymin=-Inf,ymax=Inf,
+             fill='#7A0403FF',
+             alpha = 0.5,
+    ) +
+  annotate("text",
+             x=6,
+             y=-18,
+             label="Treatment>Control",
+             size=8,
+           angle=90
+           )+
+    geom_ribbon(aes(ymin = lower, ymax = upper),
+                alpha = 0.5,
+                fill=rib_col) +
+    geom_line(data=comp_StO2_full,aes(y=0),size=0.5)+
+    geom_line(color='black',size=1) +
+
+    facet_wrap(~ pair) +
+    theme_classic()+
+    labs(x = 'Days', y = expression(paste('Difference in StO'[2] )))+
+    scale_x_continuous(breaks=c(0,2,5,7,10))+
+    theme(
+        text=element_text(size=18),
+        legend.title=element_blank()
+    )
+
+
+###for missing data
+comp2<-smooth_diff(mod_m1,pdat,'Control','Treatment')
+comp_StO2_missing <- cbind(Day = seq(0, 10, length = 400),
+                   rbind(comp2))
+
+missing_plot<-ggplot(comp_StO2_missing, aes(x = Day, y = diff, group = pair)) +
+    geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.2) +
+    geom_line(color='black',size=1) +
+    facet_wrap(~ pair) +
+    labs(x = 'Days', 
+         y = expression(paste('Difference in StO'[2],'\n (missing data)' 
+                              )))+
+  scale_x_continuous(breaks=c(0,2,5,7,10))+
+  theme_classic()+
+  theme(
+     text=element_text(size=18),
+     legend.title=element_blank()
+     )
+
+my_list<-pairwise_limits(comp_StO2_missing)
+
+c2<-ggplot(comp_StO2_missing, aes(x = Day, y = diff, group = pair)) +
+    annotate("rect",
+             xmin =my_list$init1, xmax =my_list$final1,ymin=-Inf,ymax=Inf,
+             fill='#30123BFF',
+             alpha = 0.5
+             ) +
+  annotate("text",
+             x=1.5,
+             y=-18,
+             label="Control>Treatment",
+           size=8,
+           angle=90
+           )+
+    annotate("rect",
+             xmin =my_list$init2, xmax =my_list$final2,ymin=-Inf,ymax=Inf,
+             fill='#7A0403FF',
+             alpha = 0.5,
+    ) +
+  annotate("text",
+             x=6,
+             y=-18,
+             label="Treatment>Control",
+             size=8,
+           angle=90
+           )+
+    geom_ribbon(aes(ymin = lower, ymax = upper),
+                alpha = 0.5,
+                fill=rib_col) +
+    geom_line(data=comp_StO2_missing,aes(y=0),size=0.5)+
+    geom_line(color='black',size=1) +
+    facet_wrap(~ pair) +
+    theme_classic()+
+    labs(x = 'Days', y = expression(paste('Difference in StO'[2] )))+
+    scale_x_continuous(breaks=c(0,2,5,7,10))+
+    theme(
+        text=element_text(size=18),
+        legend.title=element_blank()
+    )
+
+pair_comp<-c1+c2
+```
+
+(ref:pairwise-comp) Pairwise comparisons for smooth terms. A: Pairwise comparisons for the full dataset.  B: Pairwise comparisons for the dataset with missing observations. Significant differences exist where the 95% empirical Bayesian credible interval does not cover 0. In both cases the effect of treatment is significant after day 3.
+
+```{r,plot-pairwise-comp,fig.width=10, fig.height=7, out.width='75%', fig.align='center',echo=FALSE,message=FALSE, warning=FALSE,fig.cap='(ref:pairwise-comp)'}
+
+pair_comp+plot_annotation(tag_levels='A')&
+  theme(
+     text=element_text(size=18)
+     )
+
+```
+
+
+## Determination of significance in GAMs for longitudinal data{#GAM-significance}
+
+At the core of a biomedical longitudinal study lies the question of a significant difference between the effect of two or more treatments in different groups. Whereas in rm-ANOVA a _post-hoc_ analysis is required to answer such question by calculating some _p-values_ after multiple comparisons, GAMs can use a different approach to estimate significance. In essence, the idea behind the estimation of significance in GAMs across different treatment groups is that if the _difference_ between the empirical Bayesian confidence intervals of the fitted smooths for such groups is  non-zero, then a significant difference exists at that time point(s). The absence of a _p-value_ in this case might seem odd, but the empirical Bayesian confidence interval interpretation can be conceptualized in the following manner: Different trends in each group are an indication of an effect by the treatment. This is what happens for the simulated data in Figure \@ref(fig:sim-smooth-plot)A, where the chemotherapy causes $\mbox{StO}_2$ to increase over time. 
+
+With this expectation of different trends in each group, computing the difference between the trends will identify if the observed change is significant. The difference between groups with similar trends is likely to yield zero, which would indicate that the treatment is not causing a change in the response in one of the groups (assuming the other group is a Control or Reference group).
+
+Consider the calculation of pairwise differences for the smooths in Figure \@ref(fig:sim-smooth-plot)B and Figure \@ref(fig:sim-smooth-plot)D. Figure \@ref(fig:plot-pairwise-comp) shows the comparison between each treatment group for the full and missing datasets. Here, the  "Control" group is used as the reference to which "Treatment" group is being compared. Of notice, the pairwise comparison has been set on the response scale (see Appendix for code details), because otherwise the comparison appears shifted and is not intuitively easy to relate to the original data.  
+
+With this correction in mind, the shaded regions over the confidence interval (where it does not cover 0) indicate the time interval where each group has a higher effect than the other. Notice that the shaded region between days 0 and $\approx$ 2 for the full dataset indicates that through that time, the "Control" group has higher mean $\mbox{StO}_2$, but as therapy progresses the effect is reversed and by $\approx$ 3 day  it is the "Treatment" group the one that on average, has greater $\mbox{StO}_2$. This would suggest that the effect of chemotherapy in the "Treatment" group becomes significant after day 3 for the given model. Moreover, notice that although there is no actual measurement at day 3, the model is capable of providing an estimate of when the shift in mean $\mbox{StO}_2$ occurs. 
+
+On the data with missing observations (Figure \@ref(fig:sim-smooth-plot)D), the empirical Bayesian credible intervals of the smooths overlap between days 0 and 3. Consequently, the smooth pairwise comparison (Figure \@ref(fig:plot-pairwise-comp)B) shows that there is no evidence of a significant difference between the groups during that period, but is still able to pick the change on day 3 as the full dataset smooth pairwise comparison. 
+
+In a sense, the pairwise smooth comparison is more informative than a _post-hoc_ _p-value_. For biomedical studies, the smooth comparison is able to provide an estimate of _when_ and by _how much_ a biological process becomes significant. This is advantageous because it can help researchers gain insight on metabolic changes and other biological processes that can be worth examining, and can help refine the experimental design of future studies in order to obtain measurements at time points where a significant change might be expected.
+

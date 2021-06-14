@@ -3,7 +3,7 @@
 
 
 
-This repository contains all the code and data used for the paper, which is available here. In this paper we explore the use of generalized additive models (GAMs) in biomedical research.
+This repository contains all the code and data used for the paper, which is available [in bioRxiv](https://www.biorxiv.org/content/10.1101/2021.06.10.447970v2). In this paper we explore the use of generalized additive models (GAMs) in biomedical research.
 
 # Important information
 

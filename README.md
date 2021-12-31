@@ -1,36 +1,56 @@
-# Using generalized additive models to analyze biomedical non-linear longitudinal data
+# Generalized additive models to analyze biomedical non-linear longitudinal data in R: Beyond repeated measures ANOVA and Linear
+# Mixed Mixed Models
 [![License: CC BY 4.0](https://img.shields.io/badge/License%20All-CC%20BY%204.0-lightgrey)](https://creativecommons.org/licenses/by/4.0/) [![License: CC0-1.0](https://img.shields.io/badge/License%20Parts-CC0%201.0-lightgrey)](http://creativecommons.org/publicdomain/zero/1.0/)
-
-
 
 This repository contains all the code and data used for the paper, which is available [in bioRxiv](https://www.biorxiv.org/content/10.1101/2021.06.10.447970v2). In this paper we explore the use of generalized additive models (GAMs) in biomedical research.
 
-# Important information
+# How to use this repository
 
-All the required libraries to run the code can be found in `Full_document.Rmd`. If individual sections of code are desired to be run the best way to do it is to load the required libraries and set seed (both can be found in the same code chunk in `Full_document.Rmd`) and run the desired chunks that can be found in each of:
+The best way to reproduce the paper and its results is to fork this repository and follow the instructions below.
 
+# Instructions
+
+All the required libraries to run the code can be found in `Main_manuscript.Rmd` (which calls all the files in `sections` to generate the main manuscript). Although individual code chunks can be run, it is advised first generate a document by knitting `Main_manuscript.Rmd`. If individual chunks of code want to be examined, it is best to open the `.Rmd` file of interest from `sections`, and see the code structure in relation to the different functions and code found in `scripts` (see below).
+
+The different manuscript sections can be found in the `sections` directory, which contains:
+
+- `01-Background.Rmd`: first part of the manuscript.
 - `02-Challenges.Rmd` which contains code to: 
     - Simulate linear and non-linear data
     - Create a plot  that visualizes the fits of rm-ANOVA and LMEMs for the simulatd data (linear and non-linear).
-- `03-GAM Theory.Rmd `, which contains code to create a plot that explains how smooths are created in GAMs.
-- `04-Longitudinal analysis with GAMs`, which contains code to:
-    - Generate simulated data that follows the trends reported in Figure 3, C in Vishwanath, Karthik, et al. "Using optical spectroscopy to longitudinally monitor physiological changes within solid tumors." Neoplasia 11.9 (2009): 889-900. [(Link)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2735810/)
+- `03-GAM Theory.Rmd `, which contains the theory of LMs, GLMs and GLMMs as the foundation to understand GAMs. Also contains code to create a plot that explains how smooths are created in GAMs.
+- `04-Longitudinal analysis with GAMs`, which contains:
+    - Generation of simulated data that follows the trends reported in Figure 3, C in Vishwanath, Karthik, et al. "Using optical spectroscopy to longitudinally monitor physiological changes within solid tumors." Neoplasia 11.9 (2009): 889-900. [(Link)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2735810/)
     - Fit a GAM and a rm-ANOVA model to the simulated data.
-    - Create missing observations in the simulated data.
-    - Generate a plot of the raw data and the model fits (full and missing data cases)
-    - Do pairwise comparisons between smooths for the GAM (full and missing data cases)
+    - Create incomplete observations in the simulated data.
+    - Generate a plot of the raw data and the model fits (full and incomplete data cases)
+    - Theory behind empirical Bayesian simultaneous confidence intervals
+    - Do pairwise comparisons between smooths for the GAM (full and incomplete data cases)
+- `05-Discussion.Rmd`: Discussion
+- `06-Conclusion.Rmd`: Conclusion, acknowledgements.
 
-The workflow to fit a GAM can be found in `07-Appendix.Rmd`
+This work has two appendices, which can be found in the directory `appendices`: 
 
-Note that although the code in each of the aforementioned files is independent from code in other files, certain sections of code _in each file_ may depend on other code chunks _within_ the same file. 
+- Appendix A: Contains the workflow to fit a GAM using simulated data.
+- Appendix B: Contains code for functions used through the main manuscript and Appendix A.
 
-The repository also contains the additional files required to knit a full PDF/HTML document: 
+Each Appendix `.Rmd` file (either `Appendix_A` or `Appendix_B`) is a stand-alone document that can be compiled independently from each other and the main manuscript. In this way, the reader chooses the section of interest.
 
-- `preamble.sty` contains LaTeX formatting options for a PDF document (author block, line numbers, figures, etc.)
-- `refs.bib` contains the References used in the paper
-- `style.css` has the CSS options for an HTML document.
-- `elsevier-with-titles.csl` has the formatting used for the References.
-- `orcid.png` is the ORCID logo used in the manuscript to associate the ORCID number of the authors and  display it in the paper.
+The directory `scripts` contains the following:
+
+- `example.R`: Script that simulated linear and quadratic longitudinal data and fits a LMEM and rm-ANOVA.
+- `plot_example.R`: Uses the data from `example.R` to generate a composite plot showing data and fits.
+- `basis_functions.R`: Simulates longitudinal data with quadratic trend, fits a GAM and extracts the basis functions. Creates combined plot that appears in Figure 2 in the main manuscript.
+code in R used to generate plots, simulate data, and for obtaining confidence intervals (both across the function and simultaneous) for the fitted smooths.
+- `simulate_data.R`: Simulates normally distributed longitudinal data using the trends found in Vishwanath, Karthik, et al. "Using optical spectroscopy to longitudinally monitor physiological changes within solid tumors." Neoplasia 11.9 (2009): 889-900. [(Link)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2735810/)
+- `pointwise_comparisons.R`: When a GAM is fitted to the simulated data from `simulate_data.R`, this function estimates both the difference between the different smooths and a pointwise (across the function) confidence interval.
+- `difference_smooths.R`: Uses the output from `pointwise_comparisons.R` to generate a simultaneous confidence interval for the difference. This script is based on the function [`confint`](https://gavinsimpson.github.io/gratia/reference/confint.gam.html) from Gavin Simpson's package _gratia_.
+- `pairwise_limits.R`: Estimates the regions of significance from the smooth comparisons to add rectangles that highlight the significant time intervals.
+
+- `gam_diagnostics.R`: Function that uses the source code of `gam.check` to only generate numerical diagnostics.
+
+
+The repository also contains directories `bibliography` for references used in the main manuscript, `latex_docs` for LaTeX compilation and `html_docs` if HTML output is desired. Only the LaTeX output is guaranteed to work at this stage.
 
 # License
 
@@ -44,4 +64,5 @@ This entire repository is licensed under a CC BY 4.0 License, which allows reuse
 All other files are under CC BY 4.0.
 
 # Contact
+
 If you have questions or comments please contact Ariel Mundo (aimundo AT uark.edu)

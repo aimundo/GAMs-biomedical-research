@@ -1,0 +1,124 @@
+---
+title: '**Generalized additive models to analyze biomedical non-linear longitudinal data in R: Beyond repeated measures ANOVA and Linear Mixed Models**'
+header-includes:
+    \usepackage{placeins}
+output:  
+  bookdown::pdf_document2:
+    #template: my-template.tex #if a custom template that removes the additional "and" in the author information is desired
+    fontsize: 12pt
+    fontfamily: helvetica
+    pandoc_args: --listings #calls the listings package to fit code within the page margins
+    keep_tex: yes #keep LaTeX file for submission
+    fig_caption: yes #allows captions in figures
+    toc: false #do not include table of contents
+    extra_dependencies:
+      subfig: null #allows for subfigures
+      breqn: null #line breaks for long equations
+      caption: ["font={small}"] #size of the figure captions
+      #float: null #allows for control of placement of figures
+    includes:
+      in_header: latex_docs/preamble.sty #additional LaTeX formatting
+  bookdown::word_document2:
+    fig_caption: yes #figure caption
+    keep_md: yes
+  bookdown::html_document2:
+    css: "html_docs/style.css" #style for the HTML document
+csl: bibliography/american-medical-association.csl #style for references
+bibliography: bibliography/refs.bib #references
+link-citations: yes #adds links to the citations
+'': default
+# knit: |
+#   (function(inputFile, encoding) {
+#     outputFile<-gsub("Rmd$","pdf", basename(inputFile))
+#     rmarkdown::render(
+#       input=inputFile, 
+#       output_file= here::here("Manuscripts/Manuscript_by_chapters-SIM_Revisions/output", outputFile)
+#     )
+#   })
+---
+
+
+# Abstract
+
+In biomedical research, the outcome of longitudinal studies has been traditionally analyzed using the _repeated measures analysis of variance_ (rm-ANOVA) or more recently, _linear mixed models_ (LMEMs). Although LMEMs are less restrictive than rm-ANOVA in terms of assumptions about imbalanced observations and correlation between observations, both methodologies assume a linear trend in the measured response. It is common in biomedical research that the true trend response is nonlinear and in these cases the linearity assumption of rm-ANOVA and LMEMs can lead to biased estimates and unreliable inference.
+
+In contrast, generalized additive models (GAMs) relax the assumptions made by LMEMs and rm-ANOVA, and allow the data to determine the fit of the model while permitting incomplete observations and different correlation structures. Therefore, GAMs present an excellent choice to analyze longitudinal data with non-linear trends in the context of biomedical research. This paper summarizes the limitations of rm-ANOVA and LMEMs and uses simulated data to visually show how both methods produce biased estimates when used on non-linear data. We present the basic theory of GAMs and using reported trends of oxygen saturation in tumors, we simulate example longitudinal data (2 treatment groups, 10 subjects per group, 5 repeated measures for each group) to demonstrate their implementation in R. We also show that GAMs are able to produce estimates that are consistent with the trends of non-linear data even in the case when incomplete observations exist (with 40% of the simulated observations missing). To make this work reproducible, the code and data used in this paper are available at: https://github.com/aimundo/GAMs-biomedical-research.
+
+# Keywords {-}
+
+longitudinal data; biomedical data; generalized additive models; simulation; R
+
+```{r setup, message = FALSE,include=FALSE}
+#the packages needed to run the code
+
+library(patchwork)
+library(tidyverse)
+library(mvnfast)
+library(nlme)
+library(mgcv)
+library(gratia)
+library(scico)
+set.seed(2021) #set seed for reproducibility
+thm1<-scale_fill_scico_d(palette="tokyo",begin=0.3, end=0.8, direction = -1, aesthetics = c("colour","fill"))
+
+#this function will remove the default "author information" that is the Pandoc LaTeX template. Otherwise, and additional "and" will appear at the end of the author list.Or, the custom template that is in the YAML header and that has the "author" line deleted may be used as well. An explanation in detail is provided at:
+#https://github.com/rstudio/bookdown/issues/1158
+remove_author <- function(x) {
+  # identify empty author line
+  i <- grep("^\\\\author\\{\\}$", x)
+  # be sure it is the one pandoc inserts
+  if(length(i) != 0 && grepl('^\\\\date\\{', x[i+1])) x <- x[-i]
+  x
+}
+options(bookdown.post.latex = remove_author)
+
+```
+
+
+```{r child='sections/01-Background.Rmd'}
+```
+
+<!-- \FloatBarrier -->
+
+```{r child='sections/02-Challenges.Rmd'}
+```
+
+<!-- \FloatBarrier -->
+
+```{r child='sections/03-GAM Theory.Rmd'}
+```
+
+<!-- \FloatBarrier -->
+
+```{r child='sections/04-Longitudinal analysis with GAMs.Rmd'}
+```
+
+<!-- \FloatBarrier -->
+
+```{r child='sections/05-Discussion.Rmd'}
+```
+
+<!-- \FloatBarrier -->
+
+```{r child='sections/06-Conclusion.Rmd'}
+```
+
+<!-- \FloatBarrier -->
+
+# Supplementary Materials {-}
+
+Two Appendices which contain a basic workflow to implement GAMs in R and all the code used to create this manuscript are available as PDFs in the Supplementary Material. A GitHub repository containing all the code used for this paper along with detailed instructions for its use is available at https://github.com/aimundo/GAMs-biomedical-research.
+
+***
+
+# References
+
+<div id="refs"></div>
+
+
+
+<!-- ```{r child='07-Appendix.Rmd'} -->
+
+<!-- ``` -->
+
+

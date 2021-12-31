@@ -1,0 +1,107 @@
+# Linear Models, and beyond
+
+Linear models (LMs) are those that assume a normal (Gaussian) distribution of the errors, and only incorporate _fixed effects_ (such as rm-ANOVA). These are by far the models most commonly used to analyze data within the biomedical research community.  On the other hand, Linear Mixed Effect Models (LMEMs) also incorporate _random effects_, as it has been described in Section \@ref(LMEM-case).
+
+In reality, rm-ANOVA and LMEMs are just _special cases_ of a broader class of models (General Linear Models and Generalized Linear Mixed Models, respectively). In order to fully capture the constraints of such models and to understand how GAMs overcome those limitations this section will briefly provide an overview of the different classes of models and indicate how rm-ANOVA, LMEMs, and GAMs fit within this framework.
+
+
+## Generalized Linear Models (GLMs)
+
+A major limitation of LMs is their assumption of normality in the errors. If the residuals are non-normal, a transformation is necessary in order to properly fit the model. However, transformation can lead to poor model performance [@ohara2010], and can cause problems with the biological interpretation of the model estimates. McCullagh and Nelder [@nelder1972] introduced General Linear Models (GLMs) as an extension of LMs, where the errors do not need to be normally distributed. To achieve this, consider the following model
+
+\begin{equation}
+y_{ijt} \sim \mathcal{D}(\mu_{ijt},\phi),
+(\#eq:GLM-y)
+\end{equation}
+
+where $y_{ijt}$ is the observation $i$ in group $j$ at time $t$, that is assumed to come from some distribution of the exponential family $\mathcal{D}$, with some mean $\mu_{ijt}$, and potentially, a dispersion parameter $\phi$ (which in the Gaussian case is the variance $\sigma^{2}$). The mean ($\mu_{ijt}$) is also known as the _expected value_ (or _expectation_) $E(y_{ijt})$ of the observed response $y_{ijt}$. 
+
+Then, the _linear predictor_ $\eta$, which defines the relationship between the mean and the covariates can be defined as
+
+\begin{equation}
+\eta_{ijt}=\beta_0+\beta_1 \times treatment_{j} +\beta_2 \times time_{t} +\beta_3 \times time_{t}\times treatment_{j},
+(\#eq:GLM-eta)
+\end{equation}
+
+where $\eta_{ijt}$ is the linear predictor for each observation $i$ in each group $j$, at each timepoint $t$. Following the notation from Equation \@ref(eq:linear-model) the model parameters for each group are $\beta_0$ (the intercept), $\beta_{1}$, $\beta_2$, and $\beta_3$; $time_{t}$ represents the covariates from each subject in each group at each time point, $treatment_j$ represents the different treatment levels, and $time_t \times treatment_j$ represents their interaction.
+
+Finally, 
+
+\begin{equation}
+E(y_{ijt})=\mu_{ijt}=g^{-1}(\eta_{ijt}),
+(\#eq:GLM-Expectation)
+\end{equation}
+
+where $E(y_{ijt})$ is the expectation, and $g^{-1}$ is the inverse of a _link function_  ($g$). The link function transforms the values from the response scale to the scale of the linear predictor $\eta$ (Equation \@ref(eq:GLM-eta)). Therefore, it can be seen that LMs (such as rm-ANOVA) are a special case of GLMs where the response is normally distributed.
+
+## Generalized linear mixed models (GLMMs)
+
+Although GLMs relax the normality assumption, they only accommodate fixed effects. Generalized Linear Mixed Models (GLMMs) are an extension of GLMs that incorporate _random effects_, which have an associated probability distribution [@mcculloch2001]. Therefore, in GLMMs the linear predictor takes the form
+
+\begin{equation}
+\eta_{ijt}=\beta_0+\beta_1 \times treatment_{j} + \beta_2 \times time_{t} +\beta_3 \times time_{t}\times treatment_{j}+\alpha_{ij},
+(\#eq:GLMM-eta)
+\end{equation}
+
+where $\alpha_{ij}$ corresponds to the random effects that can be estimated within each subject in each group, and all the other symbols correspond to the notation of Equation \@ref(eq:GLM-eta). Therefore, LMEMs are special case of GLMMs where the distribution of the response is normally distributed [@nelder1972], and GLMs are a special case of GLMMs where there are no random effects. In-depth and excellent discussions about LMs, GLMs and GLMMs can be found in Dobson [@dobson2008] and Stroup [@stroup2013].
+
+### GAMs as a special case of Generalized Linear Models{#GAM-theory}
+
+#### GAMs and Basis Functions
+
+Notice that in the previous sections, the difference between GLMs and GLMMs resides on their linear predictors (Equations \@ref(eq:GLM-eta), \@ref(eq:GLMM-eta)). Generalized additive models (GAMs) are an extension of the GLM family that allow the estimation of smoothly varying trends where the relationship between the covariates and the response is modeled using _smooth functions_ [@simpson2018;@wood2017;@hastie1987]. In a GAM, the linear predictor has the form
+
+\begin{equation}
+\eta_{ijt}=\beta_{0}+ \beta_{1} \times treatment_{j} +f(time_{t}|\beta_{j}),
+(\#eq:GAM-eta)
+\end{equation}
+
+where $\beta_{0}$ is the intercept, and $\beta_{1}$ is the coefficient for each treatment group. Notice that the construction of the predictor is similar to that of Equation \@ref(eq:GLM-eta), but in this case the parametric terms involving the effect of time, and the interaction between time and treatment have been replaced by the smooth term $f(time_{t}|\beta_{j})$. The smooth term $f(time_{t}|\beta_{j})$ gives a different smooth response for each treatment. ^[If the smooth term represented a linear relationship, then $f(time_{t}|\beta_{j})= \beta_2 \times time_t+\beta_3 \times time_t \times treatment_j$; however, in general, the smooth term is a more flexible function than a linear relationship, with parameter vectors $\beta_{j}$ for each treatment] A GAM version of a linear model can be written as
+
+
+\begin{equation}
+  y_{ijt}=\beta_0+ \beta_1 \times treatment_j + f(time_t\mid \beta_j)+\varepsilon_{ijt},
+  (\#eq:GAM)
+\end{equation}
+
+where $y_{ijt}$ is the response at time $t$ of subject $i$ in group $j$, and $\varepsilon_{ijt}$ represents the deviation of each observation from the mean.
+
+In contrast to the linear functions used to model the relationship between the covariates and the response in rm-ANOVA or LMEM, the use of smooth functions in GAMs is advantageous as it does not restrict the model to a linear relationship, although a GAM can estimate a linear relationship if the data is consistent with a linear response. One possible set of functions for $f(time_t\mid \beta_j)$ that allow for non-linear responses are polynomials (which can also be used in LMEMs), but a major limitation is that polynomials create a "global" fit as they assume that the same relationship exists everywhere, which can cause problems with inference [@beck1998]. In particular, polynomial fits are known to show boundary effects because as $t$ goes to $\pm \infty$, $f(time_t \mid \beta_j)$ goes to $\pm \infty$ which is almost always unrealistic and causes bias at the endpoints of the time period.
+
+The smooth functional relationship between the covariates and the response in GAMs is specified  using a semi-parametric relationship that can be fit within the GLM framework, using a _basis function_ expansion of the covariates and estimating random coefficients associated with these basis functions. A _basis_ is a set of functions that spans the mathematical space within which the true but unknown $f(time_t)$  is thought to exist [@simpson2018]. For the linear model in Equation \@ref(eq:linear-model), the basis coefficients are $\beta_1$, $\beta_2$ and $\beta_3$ and the basis vectors are $treatment_j$, $time_t$, and $time_t \times treatment_j$. The basis function then, is the linear combination of basis coefficients and basis vectors that map the possible relationship between the covariates and the response [@hefley2017], which in the case of Equation \@ref(eq:linear-model) is restricted to a linear family of functions.  In the case of Equation \@ref(eq:GAM), the basis functions are contained in the expression $f(time_t\mid \beta_j)$, which means that the model allows for non-linear relationships among the covariates.
+
+Splines (which derive their name from the physical devices used by draughtsmen to draw smooth curves) are commonly used as basis functions that have a long history in solving semi-parametric statistical problems and are often a default choice to fit GAMs as they are a simple, flexible, and powerful option to obtain smoothness [@wegman1983]. Although different types of splines exist, cubic, thin plate splines, and thin plate regression splines will be briefly discussed next to give a general idea of these type of basis functions, and their use within the GAM framework. 
+
+Cubic splines (CS) are smooth curves constructed from cubic polynomials joined together in a manner that enforces smoothness. The use of CS as smoothers in GAMs was discussed within the original GAM framework [@hastie1987], but they are limited by the fact that their implementation requires the selection of some points along the covariates (known as 'knots', the points where the basis functions meet) to obtain the finite basis, which affects model fit [@wood2003]. A solution to the knot placement limitation of CS is provided by thin plate splines (TPS), which provide optimal smooth estimation without knot placement, but that are computationally costly to calculate [@wood2003; @wood2017]. In contrast, thin plate regression splines (TPRS) provide a reasonable "low rank" (truncated) approximation to the optimal TPS estimation, which can be implemented in an computationally efficient [@wood2003]. Like TPS, TPRS only requires specifying the number of basis functions to be used to create the smoother (for mathematical details on both TPS and TPRS see Wood[@wood2003;@wood2017]).
+
+To further clarify the concept of basis functions and smooth functions, consider the simulated response for Group 1 that appears in Figure \@ref(fig:l-q-response)D. The simplest GAM model that can be used to estimate such response is that of a single smooth term for the time effect; i.e., a model that fits a smooth to the trend of the group through time. A computational requisite in _mgcv_ is that the number of basis functions to be used to create the smooth cannot be larger than the number of unique values from the independent variable. Because the data has six unique time points, we can specify a maximum of six basis functions (including the intercept) to create the smooth. It is important to note that is not necessary to specify a number of basis equal to the number of unique values in the independent variable; fewer basis functions can be specified to create the smooth as well, as long as they reasonably capture the trend of the data.
+
+Here, the main idea is that the resulting smooth matches the data and approximates the true function without becoming too "wiggly" due to the noise present. A detailed exploration of wiggliness and smooth functions is beyond the scope of this manuscript, but in essence controlling the wiggliness (or "roughness") of the fit is achieved by using a _smoothness parameter_ ($\lambda$), which is used to penalize the likelihood by multiplying it with the integrated square of the second derivative of the spline smooth. The second derivative of the spline smooth is a measure of curvature, or the rate of change of the slope [@simpson2018; @wood2017], and increasing the penalty by increasing $\lambda$ results in models with less curvature. As $\lambda$ increases, the parameter estimates are penalized (shrunk towards 0) where the penalty reduces the wiggliness of the smooth fit to prevent overfitting. In other words, a low penalty estimate will result in wiggly functions whereas a high penalty estimate provides evidence that a linear response is appropriate.
+
+With this in mind, if four basis functions (plus the intercept) are used to fit a GAM for the data of Group 1 (concave down trend) that appears in Figure \@ref(fig:l-q-response)D, the resulting fitting process is shown in Figure \@ref(fig:basis-plot). In Figure \@ref(fig:basis-plot)A the four basis functions (and the intercept) are shown. Each of the five basis functions is evaluated at six different points (because there are six points on the timeline). The coefficients for each of the basis functions of Figure \@ref(fig:basis-plot)A are estimated using a penalized regression with smoothness parameter $\lambda$, that is estimated when fitting the model. The penalized coefficient estimates fitted are shown in Figure \@ref(fig:basis-plot)B. 
+
+
+To get the weighed basis functions, each basis (from Figure \@ref(fig:basis-plot)A) is multiplied by the corresponding coefficients in Figure \@ref(fig:basis-plot)B, thereby increasing or decreasing the original basis functions. Figure \@ref(fig:basis-plot)C shows the resulting weighed basis functions. Note that the magnitude of the weighting for the first basis function has resulted in a decrease of its overall contribution to the smoother term (because the coefficient for that basis function is negative and its magnitude is less than one). On the other hand, the third basis function has roughly doubled its contribution to the smooth term. Finally, the weighted basis functions are added at each timepoint to produce the smooth term. The resulting smooth term for the effect of _time_ is shown in Figure \@ref(fig:basis-plot)D (brown line), along the simulated values which appear as points.
+
+(ref:basis-plot-caption) Basis functions for a single smoother for time. **A**: Basis functions for a single smoother for time for the simulated data of Group 1 from Figure 2. **B**: Matrix of basis function weights. Each basis function is multiplied by a coefficient which can be positive or negative. The coefficient determines the overall effect of each basis in the final smoother. **C**: Weighed basis functions. Each of the four basis functions (and the intercept) of panel A has been weighed by the corresponding coefficient shown in Panel B. Note the corresponding increase (or decrease) in magnitude of each weighted basis function. **D**: Smoother for time and original data points. The smoother (line) is the result of the sum of each weighted basis function at each time point, with simulated values for Group 1 shown as points.
+
+```{r,basis-plot,fig.width=10, fig.height=10, out.width='75%', fig.align='center',echo=FALSE,message=FALSE, fig.show='hold', fig.cap='(ref:basis-plot-caption)'}
+
+par(mar = c(2, 2, 2, 2))
+#calls the object b_plot from script basis_functions.R which contains the composite figure
+source(here::here("scripts","basis_functions.R"))
+b_plot
+
+```
+
+### A Bayesian interpretation of GAMs
+
+Bayes' theorem states that the probability of an event can be calculated using prior knowledge and observed data [@mcelreath2018]. In the case of data that shows non-linear trends, the prior that the _true_ trend of the data is likely to be smooth rather than "wiggly" introduces the concept of a prior distribution for wiggliness (and therefore a Bayesian view) of GAMs [@wood2017]. Moreover, GAMs are considered "empirical" Bayesian models when fitted using the package _mgcv_ because the smoothing parameters are estimated from the data (and not from a posterior distribution as in the "fully Bayesian" case, which can be fitted using JAGS, Stan, or other probabilistic programming language) [@miller2019]. Therefore, the confidence intervals (CIs) calculated by default for the smooth terms using _mgcv_ are considered empirical Bayesian credible intervals [@pedersen2019], which have good _across the function_ ("frequentist") coverage[@wood2017].
+
+To understand across the function coverage, recall that a CI provides an estimate of the region where the “true” or “mean” value of a function exists, taking into account the randomness introduced by the sampling process. Because random samples from the population are used to calculate the "true" value of the function, there is inherent variability in the estimation process and the CI provides a region with a nominal value (usually, 95%) where the function is expected to lie. In an _across the function_ CI (like those estimated by default for GAMs using _mgcv_), if we average the coverage of the interval over the entire function we get approximately the nominal coverage (95%). In other words, we expect that about 95% of the points that compose the true function will be covered by the across the function CI. As a consequence, some areas of the CI for the function have more than nominal coverage and some areas less than the nominal coverage.
+
+Besides the across the function CI, "simultaneous" or "whole function" CIs can also be computed, which contain the _whole function_ with a specified probability [@wood2017]. Suppose we chose a nominal value (say, 95%) and compute a simultaneous CI; if we obtain 100 repeated samples and compute a simultaneous CI in each case, we would expect that the true function lies completely within the computed simultaneous CI in 95 of those repeated samples. Briefly, to obtain a simultaneous CI we use simulation from the empirical Bayesian posterior distribution to obtain the maximum absolute standardized deviation of the model estimates, which is used to correct the coverage of the across the function CI [@ruppert2003]. 
+
+In-depth theory of the Bayesian interpretation of GAMs and details on the computation of simultaneous and across the function CIs are beyond the scope of this paper, but can be found in Miller [@miller2019], Wood[@wood2017], Simpson [@simpson2018], Marra [@marra2012], and Ruppert [@ruppert2003]. What we want to convey is that a Bayesian interpretation of GAMs allows for robust estimation using simultaneous empirical Bayesian CIs, as their estimates can be used to make comparisons between different groups in a similar way that multiple comparisons adjustments make inference from ANOVA models more reliable. 
+
+With this in mind, in the next section we consider the use of GAMs to analyze longitudinal biomedical data with non-linear trends, and use simultaneous empirical Bayesian CIs to assess significance between treatment groups.

@@ -1,0 +1,654 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\PassOptionsToPackage{dvipsnames,svgnames,x11names}{xcolor}
+%
+\documentclass[
+]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{lmodern}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  colorlinks=true,
+  linkcolor={Maroon},
+  filecolor={Maroon},
+  citecolor={Blue},
+  urlcolor={blue},
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\usepackage[margin=1in]{geometry}
+\usepackage{listings}
+\newcommand{\passthrough}[1]{#1}
+\lstset{defaultdialect=[5.3]Lua}
+\lstset{defaultdialect=[x86masm]Assembler}
+\usepackage{longtable,booktabs,array}
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{5}
+%\usepackage{lineno}
+\usepackage[affil-it,blocks]{authblk}
+\usepackage{hyperref}
+\usepackage{graphicx}
+%\usepackage[nomarkers,figuresonly]{endfloat}
+%set a box to put the ORCID logo
+\newbox{\myorcidaffilbox}
+\sbox{\myorcidaffilbox}{\large\includegraphics[height=1.7ex]{latex_docs/orcid}}
+
+%add hyperlink to the box
+\newcommand{\orcidaffila}[1]{%
+  \href{https://orcid.org/0000-0002-6014-4538}{\usebox{\myorcidaffilbox}}}
+
+\newcommand{\orcidaffilb}[1]{%
+  \href{https://orcid.org/0000-0002-6135-8191}{\usebox{\myorcidaffilbox}}}
+
+%start sections and page numbers with A
+\setcounter{page}{1}
+\renewcommand\thesection{A}
+\renewcommand\thesubsection{\thesection.\arabic{subsection}}
+\renewcommand{\thepage}{A-\arabic{page}}
+
+
+%command for the package lineno
+%\linenumbers
+
+%authors
+\author{Ariel I. Mundo \orcidaffila{}}
+%\affil{Department of Biomedical Engineering, University of Arkansas, Fayetteville, AR, USA}
+\author{John R. Tipton \orcidaffilb{}}
+%\affil{Department of Mathematical Sciences, University of Arkansas, Fayetteville, AR, USA}
+\author{Timothy J. Muldoon*}
+%\affil{Department of Biomedical Engineering, University of Arkansas, Fayetteville, AR, USA}
+\affil{tmuldoon@uark.edu}
+
+
+%theme colors for the code chunks (originally from latex-solarized on GitHub)
+%https://github.com/jez/latex-solarized
+\usepackage{xcolor}
+\definecolor{sbase03}{HTML}{002B36}
+\definecolor{sbase02}{HTML}{073642}
+\definecolor{sbase01}{HTML}{586E75}
+\definecolor{sbase00}{HTML}{657B83}
+\definecolor{sbase0}{HTML}{839496}
+\definecolor{sbase1}{HTML}{93A1A1}
+\definecolor{sbase2}{HTML}{EEE8D5}
+\definecolor{sbase3}{HTML}{FDF6E3}
+\definecolor{syellow}{HTML}{B58900}
+\definecolor{sorange}{HTML}{CB4B16}
+\definecolor{sred}{HTML}{DC322F}
+\definecolor{smagenta}{HTML}{D33682}
+\definecolor{sviolet}{HTML}{6C71C4}
+\definecolor{sblue}{HTML}{268BD2}
+\definecolor{scyan}{HTML}{2AA198}
+\definecolor{sgreen}{HTML}{859900}
+%command to set parameter(s) in package listings
+\lstset{
+    % How/what to match
+    sensitive=true,
+    % Border (above and below)
+    frame=lines,
+    % Extra margin on line (align with paragraph)
+    xleftmargin=\parindent,
+    % Put extra space under caption
+    belowcaptionskip=1\baselineskip,
+    % Colors
+    backgroundcolor=\color{sbase3},
+    basicstyle=\color{sbase00}\ttfamily,
+    keywordstyle=\color{scyan},
+    commentstyle=\color{sbase1},
+    stringstyle=\color{sblue},
+    numberstyle=\color{sviolet},
+    identifierstyle=\color{sbase00},
+    % Break long lines into multiple lines?
+    breaklines=true,
+    % Show a character for spaces?
+    showstringspaces=false,
+    tabsize=2
+}
+
+
+%\lstset{
+%  breaklines=true,
+%  stringstyle=\ttfamily,
+%  backgroundcolor=\color{gray}
+%}
+\usepackage{placeins}
+\usepackage{subfig}
+\usepackage{breqn}
+\usepackage[font={small}]{caption}
+\usepackage{float}
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+
+\title{SUPPLEMENTARY MATERIALS for\\
+\strut \\
+\textbf{Generalized additive models to analyze biomedical non-linear longitudinal data in R:}\\
+Beyond repeated measures ANOVA and Linear Mixed Models\\
+\strut \\
+APPENDIX A: WORKFLOW FOR GAMs FOR BIOMEDICAL LONGITUDINAL DATA}
+\author{}
+\date{\vspace{-2.5em}}
+
+\begin{document}
+\maketitle
+
+\newpage
+
+\counterwithin{figure}{section}
+
+This appendix shows a basic workflow to fit a series of increasingly complex GAMs to simulated data that follows the trends presented in Section 5.1 in the main manuscript. Graphical and parameter diagnostics for goodness of fit are discussed, as well as model comparison via AIC (Aikake Information Criterion). For simplicity, the confidence intervals (CIs) shown in this section for the models are the across the function CIs created by \passthrough{\lstinline!mgcv!} by default. However, for the pairwise comparisons of the third model we use \emph{simultaneous intervals} as in the main manuscript, and the code for creating simultaneous CIs for the smooths can be found in Appendix B.
+
+\hypertarget{setup-and-data-simulation}{%
+\subsection{Setup and data simulation}\label{setup-and-data-simulation}}
+
+First, we load the libraries needed for all analyses and figures. We also set seed for reproducibility.
+
+\begin{lstlisting}[language=R]
+library(patchwork)
+library(tidyverse)
+library(mvnfast)
+library(nlme)
+library(mgcv)
+library(gratia)
+library(here)
+library(scico)
+set.seed(2021) #set seed for reproducibility
+
+#alpha for ribbon in the smooth plots
+al <- 0.8
+
+thm1 <- scale_fill_scico_d(palette = "tokyo", begin = 0.3, end = 0.8,
+                         direction = -1, aesthetics = c("colour", "fill"))
+\end{lstlisting}
+
+Next, we create a data frame with the same trends from the main manuscript:
+
+\begin{itemize}
+\tightlist
+\item
+  Two treatment groups (Control and Treatment)
+\item
+  Five time points (days 0, 2, 5, 7,10)
+\item
+  Trends in \(\mbox{StO}_2\) for both groups
+\end{itemize}
+
+\begin{lstlisting}[language=R]
+dat<-tibble(StO2  = c(4, 27, 3, 2, 0.5, 7,4, 50, 45, 56),
+            Day   = rep(c(0, 2, 5, 7, 10), times = 2),
+            Group = as.factor(rep(c("Control", "Treatment"), each = 5)))
+\end{lstlisting}
+
+We do not include a plot of the simulated data here because it follows the same trend from Figure 3A in the main manuscript (however, it can be easily plotted if desired).
+Finally, we call the function \passthrough{\lstinline!simulate\_data!} in the script \passthrough{\lstinline!simulate\_data.R!} to create 10 replicates at each time point from a normal distribution with a standard deviation of 10\% in \(\mbox{StO2}\).
+
+\begin{lstlisting}[language=R]
+n <- 10 #number of observations
+sd <- 10 #approximate sd from paper
+source(here("scripts", "simulate_data.R"))
+dat_sim <- simulate_data(dat, n, sd)
+\end{lstlisting}
+
+\hypertarget{first-model}{%
+\subsection{First model}\label{first-model}}
+
+The first model fitted to the data is one that only assumes a single smooth over time shared by both the treatment and control groups The model syntax specifies that \passthrough{\lstinline!gam\_00!} is the object that will contain all the model information, and that the model attempts to explain changes in \passthrough{\lstinline!StO2\_sim!} (simulated \(\mbox{StO}_2\)) using a smooth per \passthrough{\lstinline!Day!}. The model will use four basis functions (\passthrough{\lstinline!k = 5!}) for the smooth. The smooth is constructed by default using thin plate regression splines. The smoothing parameter estimation method used is the restricted maximum likelihood (\passthrough{\lstinline!REML!}).
+
+\begin{lstlisting}[language=R]
+gam_00<-gam(StO2_sim ~ s(Day, k = 5),
+            method   ='REML',
+            data     = dat_sim)
+\end{lstlisting}
+
+To obtain model diagnostics, two methodologies are to be used: 1) graphical diagnostics, and 2) a model check. In the first case, the functions \passthrough{\lstinline!appraise!} and \passthrough{\lstinline!draw!} from the package \emph{gratia} can be used to obtain a single output with all the graphical diagnostics. For model check, the functions \passthrough{\lstinline!gam.check!} and \passthrough{\lstinline!summary!} from \emph{mgcv} provide detailed information about the model fit and its parameters. Keep in mind that \passthrough{\lstinline!gam.check!} is a function that also provides the graphical diagnostics obtained using \emph{gratia}, if such graphical output is not desired the source code can be accessed typing \passthrough{\lstinline!gam.check!} in the Console, and the code without the graphical output can be used in a custom function (which is the approach we follow later on this Appendix).
+
+\hypertarget{graphical-diagnostics}{%
+\subsubsection{Graphical diagnostics}\label{graphical-diagnostics}}
+
+The following code chunk generates graphical checks for the fitted GAM model with a single shared smooth shared between the treatment and control groups.
+
+\begin{lstlisting}[language=R]
+appr1 <- appraise(gam_00)
+sm1 <- draw(gam_00)
+visual_check <- appr1 + sm1
+
+visual_check + plot_layout(design = layout1)
+\end{lstlisting}
+
+\begin{figure}
+
+{\centering \includegraphics[width=0.75\linewidth]{Appendix_A_files/figure-latex/first-GAM-diag-1} 
+
+}
+
+\caption{Graphical diagnostics for the first GAM model. Left: Graphical diagnostics provided by the function \passthrough{\lstinline!appraise!} from the package \emph{gratia}. Right: Fitted smooth for the model, provided by the function \passthrough{\lstinline!draw!}.}\label{fig:first-GAM-diag}
+\end{figure}
+
+
+
+From the output of the function \passthrough{\lstinline!appraise!} in Figure \ref{fig:first-GAM-diag}, the major indicators of concern about the model are the QQ plot of residuals and the histogram of residuals. The QQ plot shows that the errors are not reasonably located along the 45\(^{\circ}\) line (which indicates normality), as there are multiple points that deviate from the trend, specially in the tails. The histogram also shows that the variation (residuals) is not following the assumption of a normal distribution.
+
+The \passthrough{\lstinline!draw!} function permits to plot the smooths as \passthrough{\lstinline!ggplot2!} objects, which eases subsequent manipulation, if desired. Because model \passthrough{\lstinline!gam\_00!} specifies only one smooth for the time covariate (Day), the plot only contains only one smooth. Note that the smooth shows an almost linear profile.
+
+\hypertarget{gam-00-model-check}{%
+\subsubsection{Model check}\label{gam-00-model-check}}
+
+Special attention must be paid to the parameter `k-index' from \passthrough{\lstinline!gam.check!} (which calls \passthrough{\lstinline!k.check!} to perform the calculation). This parameter indicates if the basis dimension of the smooth is adequate, i.e., it checks that the basis used to create the smooth are adequate to capture the trends in the data. If the model is not adequately capturing the trends in the data, this is indicated by a low k-index value (\textless1). Because we plot the model diagnostics using \passthrough{\lstinline!appraise!} later, the graphical output from \passthrough{\lstinline!gam.check!} will be suppressed by creating a custom function to obtain just the model estimates, thus avoiding repetition of the diagnostic plots. This will be achieved by calling the source code of \passthrough{\lstinline!gam.check!} and using the appropriate code in a new function that will be called \passthrough{\lstinline!gam\_diagnostics!}, which can be found in the script \passthrough{\lstinline!gam\_diagnostics.R!}.
+
+In the next code chunk, we call \passthrough{\lstinline!gam.diagnostics!} to provide the desired diagnostic output:
+
+\begin{lstlisting}[language=R]
+source(here("scripts", "gam_diagnostics.R"))
+gam_diagnostics(gam_00)
+\end{lstlisting}
+
+\begin{lstlisting}
+## 
+## Method: REML   Optimizer: outer newton
+## full convergence after 5 iterations.
+## Gradient range [-2.830761e-07,-3.314641e-08]
+## (score 435.8783 & scale 388.2273).
+## Hessian positive definite, eigenvalue range [0.009374965,49.00017].
+## Model rank =  5 / 5 
+## 
+## Basis dimension (k) checking results. Low p-value (k-index<1) may
+## indicate that k is too low, especially if edf is close to k'.
+## 
+##          k'  edf k-index p-value    
+## s(Day) 4.00 1.18    0.35  <2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+\end{lstlisting}
+
+From the output of \passthrough{\lstinline!gam\_diagnostics!}, it can be seen that the \passthrough{\lstinline!k-index!} is 0.35, which indicates that the model is not capturing the variability in the data. The \passthrough{\lstinline!edf!} (effective degrees of freedom) is an indicator of the complexity of the smooth. Here the complexity of the smooth is comparable to that of a 4th degree polynomial. And now obtain a summary of the fitted model, which is obtained by calling \passthrough{\lstinline!summary!}.
+
+\begin{lstlisting}[language=R]
+summary(gam_00)
+\end{lstlisting}
+
+\begin{lstlisting}
+## 
+## Family: gaussian 
+## Link function: identity 
+## 
+## Formula:
+## StO2_sim ~ s(Day, k = 5)
+## 
+## Parametric coefficients:
+##             Estimate Std. Error t value Pr(>|t|)    
+## (Intercept)    20.17       1.97   10.24   <2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Approximate significance of smooth terms:
+##          edf Ref.df     F p-value   
+## s(Day) 1.184  1.342 8.861 0.00136 **
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## R-sq.(adj) =  0.108   Deviance explained = 11.9%
+## -REML = 435.88  Scale est. = 388.23    n = 100
+\end{lstlisting}
+
+From the \passthrough{\lstinline!summary!} function, information about the assumed distribution of the errors (Gaussian in this case) and the link function can be obtained. The link function is `identity' as the model does not make any transformation on the predictors. The `significance of smooth terms' \emph{p-value} indicates if each smooth is significantly different from a constant mean 0 under the model. Here, the \emph{p-value} is low but we have seen that there are issues with the model from the previous outputs. Finally, the `deviance explained' indicates how much of the variation in the data the model is able to capture, which in this case corresponds to \(\approx\) 12\%.
+
+\hypertarget{second-model}{%
+\subsection{Second model}\label{second-model}}
+
+The major flaw of \passthrough{\lstinline!gam\_00!} is that this model is not taking into account the fact that the data is nested in groups. The next iteration is a model where a different smooth of time (Day) is assigned for each group using \passthrough{\lstinline!by = Group!} in the model syntax. Below we fit such model, which is saved as \passthrough{\lstinline!gam\_01!}, and use \passthrough{\lstinline!gam\_diagnostiscs!} to obtain information from the model fit.
+
+\begin{lstlisting}[language=R]
+gam_01<-gam(StO2_sim ~ s(Day, by=Group, k = 5),
+            method ='REML',
+            data   = dat_sim)
+
+gam_diagnostics(gam_01)
+\end{lstlisting}
+
+\begin{lstlisting}
+## 
+## Method: REML   Optimizer: outer newton
+## full convergence after 9 iterations.
+## Gradient range [-5.875578e-07,1.45076e-08]
+## (score 400.4803 & scale 164.8662).
+## Hessian positive definite, eigenvalue range [0.892525,48.57694].
+## Model rank =  9 / 9 
+## 
+## Basis dimension (k) checking results. Low p-value (k-index<1) may
+## indicate that k is too low, especially if edf is close to k'.
+## 
+##                         k'  edf k-index p-value    
+## s(Day):GroupControl   4.00 3.69    0.58  <2e-16 ***
+## s(Day):GroupTreatment 4.00 3.72    0.58  <2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+\end{lstlisting}
+
+Diagnostics for this model indicate that the k-index is still below 1 (0.58 from \passthrough{\lstinline!gam\_diagnostics!} output), and that the residuals are still not following a normal distribution (Figure \ref{fig:second-GAM-diag}). Moreover, the smooths (plotted via the \passthrough{\lstinline!draw()!} function) appear with a fairly linear profile, which indicates they are still not capturing the trends observed in the data.
+
+\begin{lstlisting}[language=R]
+summary(gam_01)
+\end{lstlisting}
+
+\begin{lstlisting}
+## 
+## Family: gaussian 
+## Link function: identity 
+## 
+## Formula:
+## StO2_sim ~ s(Day, by = Group, k = 5)
+## 
+## Parametric coefficients:
+##             Estimate Std. Error t value Pr(>|t|)    
+## (Intercept)   20.169      1.284   15.71   <2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Approximate significance of smooth terms:
+##                         edf Ref.df      F  p-value    
+## s(Day):GroupControl   3.688  3.942  9.084 2.33e-05 ***
+## s(Day):GroupTreatment 3.723  3.954 33.465  < 2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## R-sq.(adj) =  0.621   Deviance explained =   65%
+## -REML = 400.48  Scale est. = 164.87    n = 100
+\end{lstlisting}
+
+From \passthrough{\lstinline!summary()!}, the deviance explained by the model is \(\approx\) 65\%.
+
+
+
+\begin{figure}
+
+{\centering \includegraphics[width=0.75\linewidth]{Appendix_A_files/figure-latex/second-GAM-diag-1} 
+
+}
+
+\caption{Graphical diagnostics for the second GAM model. Left: Graphical diagnostics provided by the function \passthrough{\lstinline!appraise!} from the package \emph{gratia}. Right: Fitted smooth for the model, provided by the function \passthrough{\lstinline!draw!}.}\label{fig:second-GAM-diag}
+\end{figure}
+
+\hypertarget{third-model}{%
+\subsection{Third model}\label{third-model}}
+
+Model \passthrough{\lstinline!gam\_00!} was built for didactic purposes to cover the simplest case, but it does not account for the nesting of the data by Group, which is apparent from the type of smooth fitted (a single smooth), the model diagnostics, and, the low variance explained by the model. On the other hand, \passthrough{\lstinline!gam\_01!} takes into account the nesting within each group and provides better variance explanation, but as indicated in Section 5.2 in the main manuscript, in order to differentiate between each group a parametric term needs to be added to the model for the interaction of \emph{Day} and \emph{Group}.
+
+This is because in \passthrough{\lstinline!gam\_01!} separate smooths were fitted per group and those smooths also tried to account for the different means of the response in the two groups. Adding a parametric term for \passthrough{\lstinline!Group!} enables the smooths to capture the time course-differences of each group. The resulting model is \passthrough{\lstinline!gam\_02!}, which is the model fitted in the main manuscript.
+
+\begin{lstlisting}[language=R]
+#GAM for StO2
+
+gam_02 <- gam(StO2_sim ~ Group+s(Day, by = Group, k = 5),
+            method ='REML',
+            data   = dat_sim)
+
+gam_diagnostics(gam_02)
+\end{lstlisting}
+
+\begin{lstlisting}
+## 
+## Method: REML   Optimizer: outer newton
+## full convergence after 10 iterations.
+## Gradient range [-2.934421e-07,2.346107e-07]
+## (score 355.5265 & scale 63.48881).
+## Hessian positive definite, eigenvalue range [1.21617,48.08942].
+## Model rank =  10 / 10 
+## 
+## Basis dimension (k) checking results. Low p-value (k-index<1) may
+## indicate that k is too low, especially if edf is close to k'.
+## 
+##                         k'  edf k-index p-value
+## s(Day):GroupControl   4.00 3.88    1.23    0.98
+## s(Day):GroupTreatment 4.00 3.90    1.23    0.97
+\end{lstlisting}
+
+By using \passthrough{\lstinline!appraise()!} and \passthrough{\lstinline!draw!} on this model (Figure \ref{fig:final-GAM-diag} we see that the trend on the QQ plot has improved, the histogram of the residuals appears to be reasonably close to an normal distribution, and the smooths are capturing the trend of the data within each group. From \passthrough{\lstinline!gam\_diagnostics!}, the k-index is now at an acceptable value (\(\approx\) 1.23).
+
+\begin{lstlisting}[language=R]
+summary(gam_02)
+\end{lstlisting}
+
+\begin{lstlisting}
+## 
+## Family: gaussian 
+## Link function: identity 
+## 
+## Formula:
+## StO2_sim ~ Group + s(Day, by = Group, k = 5)
+## 
+## Parametric coefficients:
+##                Estimate Std. Error t value Pr(>|t|)    
+## (Intercept)      10.574      1.127   9.384 5.36e-15 ***
+## GroupTreatment   19.191      1.594  12.043  < 2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Approximate significance of smooth terms:
+##                         edf Ref.df     F p-value    
+## s(Day):GroupControl   3.881  3.991 23.54  <2e-16 ***
+## s(Day):GroupTreatment 3.904  3.994 87.29  <2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## R-sq.(adj) =  0.854   Deviance explained = 86.7%
+## -REML = 355.53  Scale est. = 63.489    n = 100
+\end{lstlisting}
+
+From \passthrough{\lstinline!summary!}, the model is able to capture 86.7\% of the variance in the data, which is a substantial improvement over the variance explained by \passthrough{\lstinline!gam\_00!} and \passthrough{\lstinline!gam\_01!}.
+
+
+
+\begin{figure}
+
+{\centering \includegraphics[width=0.75\linewidth]{Appendix_A_files/figure-latex/final-GAM-diag-1} 
+
+}
+
+\caption{Graphical diagnostics for the final GAM model. Left: Graphical diagnostics provided by the function \passthrough{\lstinline!appraise!} from the package \emph{gratia}. Right: Fitted smooths for the model, provided by the function \passthrough{\lstinline!draw!}.}\label{fig:final-GAM-diag}
+\end{figure}
+
+\hypertarget{comparing-models-via-aic}{%
+\subsubsection{Comparing models via AIC}\label{comparing-models-via-aic}}
+
+One final comparison that can be made for model selection involves the use of the Aikake Information Criterion (AIC). This metric is used to estimate information loss, which we want to minimize with an appropriate model. Therefore, when 2 or more models are compared, the model with lower AIC is preferred. In R, the comparison is done using the \passthrough{\lstinline!AIC!} function.
+
+\begin{lstlisting}[language=R]
+AIC(gam_00, gam_01, gam_02)
+\end{lstlisting}
+
+\begin{lstlisting}
+##               df      AIC
+## gam_00  3.342420 884.4234
+## gam_01  9.895821 805.3071
+## gam_02 10.985458 710.5476
+\end{lstlisting}
+
+The output in this case is expected: model \passthrough{\lstinline!gam\_02!} has a lower AIC (710.54) whereas the initial two models have higher AICs (884.43 and 805.30). The AIC should not be considered as the only estimator of model quality, instead to be used as complimentary information to the graphical diagnostics and model checks described above.
+
+\hypertarget{pairwise-comparisons-of-smooth-confidence-intervals}{%
+\subsection{Pairwise comparisons of smooth confidence intervals}\label{pairwise-comparisons-of-smooth-confidence-intervals}}
+
+The estimation of significant differences between each treatment group can be achieved via pairwise comparisons of the smooth confidence intervals as described in Section 5.3 in the main manuscript.
+
+In this case, the ``design matrix'' is used to estimate the pairwise comparisons (see main manuscript for details and associated references). Briefly, the ``design matrix'' (also known as the ``Xp matrix'') from the selected model (\passthrough{\lstinline!gam\_02!}) is used to calculate a 95\% confidence interval of the difference between the smooth terms for each group. This approach allows to estimate the time intervals where a significant difference exists between the groups (confidence interval above or below 0).
+
+We want to emphasize that throught the manuscript and for the comparisons on \passthrough{\lstinline!gam\_02!}, we included the group means in order to keep the pairwise comparisons on the scale of the response. By default, pairwise comparisons available in other software packages (such as in G. Simpson's \emph{gratia}) do not include the group means. However, we decided to include them because for our approach, it is easier to see the magnitude in the change of the difference between two treatment groups when the means are included.
+
+The change we allude to (mean group inclusion) can be found in the script \passthrough{\lstinline!pointwise\_comparisons.R!}, at the line where we have added a comment that reads:
+
+\begin{lstlisting}[language=R]
+######IMPORTANT: uncommenting the following two lines
+    #removes the group means from the comparison######
+\end{lstlisting}
+
+The inclusion of group means works well for models like \passthrough{\lstinline!gam\_02!}, but implementing this on models with more parametric terms can be challenging and we want the reader to be aware of this.
+
+However, we do believe that the model presented in the paper covers a wide range of situations and our approach here for the pairwise comparisons will be useful for most biomedical researchers. We first call the script \passthrough{\lstinline!pointwise\_comparisons.R!} to estimate the pointwise difference, then call the script \passthrough{\lstinline!difference\_smooths.R!} which calculates the simultaneous confidence interval for the difference, and finally \passthrough{\lstinline!pairwise\_limits.R!}, which estimates the regions to be shaded for the intervals with significance in the final figure. We use \passthrough{\lstinline!difference\_smooths!} on model \passthrough{\lstinline!gam\_02!} and save the estimates in \passthrough{\lstinline!diff\_complete!}.
+
+\begin{lstlisting}[language=R]
+source(here::here("scripts","pointwise_comparisons.R"))
+source(here::here("scripts", "difference_smooths.R"))
+source(here::here("scripts", "pairwise_limits.R"))
+#compute difference between smooths and calculate confidence interval: complete data
+diff_complete <- difference_smooths(gam_02, smooth = "s(Day)", 
+                                    newdata = newdat, 
+                                    unconditional = TRUE,
+                                    frequentist = FALSE,
+                                    n = 100, partial_match = TRUE, 
+                                    nrep=10000)
+my_list <- pairwise_limits(diff_complete)
+\end{lstlisting}
+
+Next, we plot the comparisons from \passthrough{\lstinline!diff\_complete!} and create a \passthrough{\lstinline!ggplot2!} object (c1) so we can also shade the regions of significant differences easily.
+
+\begin{lstlisting}[language=R]
+rib_col <- '#8D7D82'     #color for ribbon for confidence interval
+control_rib <- '#875F79' #color for ribbon for control region
+treat_rib <- '#A7D89E'   #color for ribbon treatment region
+
+c1 <- ggplot() +
+  geom_line(data = diff_complete, aes(x = Day, y = diff), 
+            size = 1, alpha = 0.5) +
+  annotate("rect", xmin = my_list$init1, xmax = my_list$final1,
+           ymin = -Inf, ymax = Inf, fill = control_rib,
+           alpha = 0.5) + 
+  annotate("text", x = 1.5, y = -18, label = "Control>Treatment",
+           size = 6, angle = 90) +
+  annotate("rect", xmin = my_list$init2, xmax = my_list$final2,
+           ymin = -Inf, ymax = Inf, fill = treat_rib,
+           alpha = 0.5) +
+  annotate("text", x = 6, y = -18, label = "Treatment>Control",
+           size = 6, angle = 90) +
+  geom_ribbon(data = diff_complete, 
+              aes(x = Day, ymin = lower_s, ymax = upper_s),
+              alpha = 0.5, fill = rib_col, inherit.aes = FALSE) +
+  geom_hline(yintercept = 0, lty = 2, color = "red") +
+  scale_x_continuous(breaks = c(0, 2, 5, 7, 10)) +
+  labs(y = "Difference\n(Complete observations)") +
+  theme_classic()+
+  theme(axis.text = element_text(size = 22))
+\end{lstlisting}
+
+The resulting plot (Figure \ref{fig:pairwise-comp-workflow-fig}) shows the estimated difference in the smooths with a 95\% simultaneous CI. As a reminder, because we have kept the group means, we can directly see that the Treatment starts to have a significant effect around day 3. As therapy progresses, the effect continues, and the magnitude of the difference (\(\approx\) 40\%) at day five corresponds directly with the magnitude in the increase in \(\mbox{StO}_2\) in the group at the same time point in the data.
+
+
+
+\begin{figure}
+
+{\centering \includegraphics[width=0.75\linewidth]{Appendix_A_files/figure-latex/pairwise-comp-workflow-fig-1} 
+
+}
+
+\caption{Smooth pairwise comparisons for model \passthrough{\lstinline!gam\_02!} using a 95\% simultaneous CI for the difference between smooths. The comparison includes the group means and therefore can be directly correlated with the magnitude of the response. Shaded regions indicate time intervals where each treatment group has a non-zero effect.}\label{fig:pairwise-comp-workflow-fig}
+\end{figure}
+ \FloatBarrier
+
+\hypertarget{final-considerations}{%
+\subsection{Final considerations}\label{final-considerations}}
+
+In this Appendix we have shown a basic model selection workflow for GAMs. Our goal here is to familiarize the reader with the logic behind the construction of each model and the kind of diagnostic information that needs to be checked to ensure the model is adequate. One final consideration must be given to the conditional distribution of the response. In the main manuscript and through this workflow, we have assumed a normal distribution for the response, which we believe is appropriate in many biomedical scenarios. However, we must remind the reader that the normal distribution is not intended to be used as a ``one size fits all'' distribution. Depending on the type of data (counts, binary outcomes) the user can choose different conditional distributions in \emph{mgcv}.
+
+We also want to indicate that one of the major advantages of fitting GAMs in R using \emph{mgcv} is that once the appropriate conditional distribution has been chosen and model diagnostics are assessed, the user only needs to choose a basis dimension (the number of basis functions to use), and check if the basis dimension is adequately capturing the trend of the data using \passthrough{\lstinline!k.check!}. If that is not the case, then the user needs to increase \passthrough{\lstinline!k!} a bit and check \passthrough{\lstinline!k.check!} again. The process might seem mechanistic, but we hope that with the theory presented in the main manuscript and the workflow of this Appendix the user has a good understanding of what the model is doing and the rationale for choosing a GAM as a tool for statistical analysis.
+
+\hypertarget{additional-resources}{%
+\subsection{Additional resources}\label{additional-resources}}
+
+Multiple and excellent resources are available for biomedical researchers that want to gain more insight on the theory and computation of GAMs. Here we provide a brief list of resources that cover additional topics as well as available packages that are worth considering:
+
+\begin{itemize}
+\tightlist
+\item
+  Gavin Simpson's package \emph{gratia}, which provides convenient wrapper functions for plotting and pairwise comparisons.
+  CRAN page:
+  \url{https://cran.r-project.org/web/packages/gratia/gratia.pdf}
+\end{itemize}
+
+Vignette:
+
+\url{https://gavinsimpson.github.io/gratia/}
+
+\begin{itemize}
+\tightlist
+\item
+  Gavin Simpson's blog \emph{From the bottom of the heap}, which covers a wide range of topics in GAM modeling, news about updates on \emph{gratia} and provides tutorials on GAM fitting.
+\end{itemize}
+
+Link:
+
+\url{https://fromthebottomoftheheap.net/}
+
+\begin{itemize}
+\tightlist
+\item
+  Matteo Fasiolo's package \emph{mgcViz}, ane extension of the \emph{mgcv} package. Provides visual tools for Generalized Additive Models that exploit the additive structure of such models.
+\end{itemize}
+
+CRAN Page:
+
+\url{https://cran.r-project.org/web/packages/mgcViz/index.html}
+
+Vignette:
+\url{https://mfasiolo.github.io/mgcViz/articles/mgcviz.html}
+
+\begin{itemize}
+\tightlist
+\item
+  The book ``Generalized Additive Models: An Introduction with R'' (the 2nd. Edition can be found \href{https://www.routledge.com/Generalized-Additive-Models-An-Introduction-with-R-Second-Edition/Wood/p/book/9781498728331}{here}) by Simon Wood is an excellent resource for in-depth material on GAM theory, mathematical derivation, examples, and detailed descriptions on the computational aspect of \emph{mgcv}.
+\end{itemize}
+
+Finally, Noam Ross has assembled a list of online tools and resources for learning about and using GAMs in R, which cover a range of very useful videos, slides, and courses from different authors. The list can be found in Noam Ross's GitHub profile here:
+
+\href{https://github.com/noamross/gam-resources}{Resources for Learning About and Using GAMs in R}
+
+\end{document}

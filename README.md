@@ -11,7 +11,7 @@ The best way to reproduce the paper and its results is to fork this repository a
 
 # Instructions
 
-All the required libraries to run the code can be found in `Main_manuscript.Rmd` (which calls all the files in `sections` to generate the main manuscript). Although individual code chunks can be run, it is advised first generate a document by knitting `Main_manuscript.Rmd`. If individual chunks of code want to be examined, it is best to open the `.Rmd` file of interest from `sections`, and see the code structure in relation to the different functions and code found in `scripts` (see below).
+All the required libraries to run the code can be found in `Main_manuscript.Rmd` (which calls all the files in `sections` to generate the main manuscript). Although individual code chunks can be run, it is advised to first generate a document by knitting `Main_manuscript.Rmd`. If individual chunks of code want to be examined, it is best to open the `.Rmd` file of interest from `sections`, and see the code structure to the different functions and code found in `scripts` (see below).
 
 The different manuscript sections can be found in the `sections` directory, which contains:
 
@@ -35,7 +35,7 @@ This work has two appendices, which can be found in the directory `appendices`:
 - Appendix A: Contains the workflow to fit a GAM using simulated data.
 - Appendix B: Contains code for functions used through the main manuscript and Appendix A.
 
-Each Appendix `.Rmd` file (either `Appendix_A` or `Appendix_B`) is a stand-alone document that can be compiled independently from each other and the main manuscript. In this way, the reader chooses the section of interest.
+Each Appendix `.Rmd` file (either `Appendix_A` or `Appendix_B`) is a stand-alone document that can be compiled independently from each other and the main manuscript. In this way, the reader chooses the section of interest and can examine and run the code independently.
 
 The directory `scripts` contains the following:
 

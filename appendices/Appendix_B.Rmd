@@ -2,7 +2,7 @@
 title: | 
     | SUPPLEMENTARY MATERIALS for
     |
-    | **Generalized additive models to analyze biomedical non-linear longitudinal data in R:**
+    | **Generalized additive models to analyze non-linear trends in biomedical longitudinal data using R:**
     | Beyond repeated measures ANOVA and Linear Mixed Models
     | 
     | APPENDIX B: CODE 

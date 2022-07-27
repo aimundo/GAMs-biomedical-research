@@ -64,12 +64,16 @@ The repository also contains directories `bibliography` for references used in t
 
 # License
 
-This entire repository is licensed under a CC BY 4.0 License, which allows reuse with attribution. However, certain files are released under the CC0 1.0 public domain dedication. The files indicated below are dual licensed under CC BY 4.0 and CC0 1.0:
+This entire repository is licensed under a CC BY 4.0 License, which allows reuse with attribution. However, certain files are released under the CC0 1.0 public domain dedication, and others are released under the MIT license. The files indicated below are dual licensed under CC BY 4.0 and CC0 1.0:
 
 - `02-Challenges.Rmd`
 - `03-GAM Theory.Rmd`
 - `04-Longitudinal analysis with GAMs`
 - `07-Appendix.Rmd`
+
+The file below is licensed under MIT:
+
+- `difference_smooths.R`
 
 All other files are under CC BY 4.0.
 

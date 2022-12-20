@@ -79,4 +79,4 @@ All other files are under CC BY 4.0.
 
 # Contact
 
-If you have questions or comments please contact Ariel Mundo (aimundo AT uark.edu)
+If you have questions or comments please contact Ariel Mundo (ariel.mundo.ortiz@umontreal.ca)

@@ -5,7 +5,7 @@ Generalized additive models to analyze non-linear trends in biomedical longitudi
 [![License: MIT](https://img.shields.io/badge/License%20Parts-MIT-lightgrey)](https://opensource.org/licenses/MIT)
 
 
-This repository contains all the code and data used for the paper, which is available [in bioRxiv](https://www.biorxiv.org/content/10.1101/2021.06.10.447970v2). In this paper we explore the use of generalized additive models (GAMs) in biomedical research.
+This repository contains all the code and data used for the paper, which has been published in [_Statistics in Medicine_](https://doi.org/10.1002/sim.9505). In this paper we explore the use of generalized additive models (GAMs) in biomedical research.
 
 # How to use this repository
 
